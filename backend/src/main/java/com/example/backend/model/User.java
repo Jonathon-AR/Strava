@@ -1,12 +1,9 @@
 package com.example.backend.model;
 
 import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "username"),
         @UniqueConstraint(columnNames = "email")
 })
 public class User {
@@ -20,8 +17,6 @@ public class User {
 
     private String password;
 
-
-    // Constructors, Getters, and Setters
     public User() {
     }
 
@@ -31,7 +26,6 @@ public class User {
         this.password = password;
     }
 
-    // ID
     public Long getId() {
         return id;
     }
@@ -40,7 +34,6 @@ public class User {
         this.id = id;
     }
 
-    // Username
     public String getUsername() {
         return username;
     }
@@ -49,7 +42,6 @@ public class User {
         this.username = username;
     }
 
-    // Email
     public String getEmail() {
         return email;
     }
@@ -58,7 +50,6 @@ public class User {
         this.email = email;
     }
 
-    // Password
     public String getPassword() {
         return password;
     }
