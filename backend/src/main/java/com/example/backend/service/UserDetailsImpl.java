@@ -1,4 +1,4 @@
-package com.example.backend.security.services;
+package com.example.backend.service;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,7 +8,6 @@ import java.util.Objects;
 
 public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
-
     private Long id;
     private String username;
     private String email;

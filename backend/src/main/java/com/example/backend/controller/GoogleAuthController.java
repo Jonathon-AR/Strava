@@ -1,14 +1,16 @@
 package com.example.backend.controller;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.example.backend.security.jwt.JwtTokenProvider;
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.utils.JwtTokenProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import java.util.Optional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/login/auth/google")
@@ -48,21 +50,17 @@ public class GoogleAuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Failed to retrieve user info");
         }
 
-        System.out.println(googleUser.toString());
         String email = googleUser.getEmail();
-        String name = googleUser.getName();
-
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        User user = optionalUser.orElseGet(() -> {
-            User newUser = new User();
-            newUser.setEmail(email);
-            newUser.setUsername(name);
-            newUser.setPassword(passwordEncoder.encode("google_auth_user")); // Placeholder password
-            return userRepository.save(newUser);
-        });
-
-        String token = jwtTokenProvider.createToken(user.getEmail());
-        return ResponseEntity.ok(new AuthResponse(token));
+        if(userRepository.existsByEmail(email)){
+            String token = jwtTokenProvider.createToken(email);
+            return ResponseEntity.ok(new AuthResponse(token,false));
+        }
+        else {
+            String name = googleUser.getName();
+            userRepository.save(new User(email,name,passwordEncoder.encode("google_auth_user")));
+            String token = jwtTokenProvider.createToken(email);
+            return ResponseEntity.ok(new AuthResponse(token,true));
+        }
     }
 }
 
@@ -98,11 +96,12 @@ class GoogleUserResponse {
 
 class AuthResponse {
     private String token;
+    private Boolean isNewUser;
 
-    public AuthResponse(String token) {
+    public AuthResponse(String token, Boolean isNewUser){
         this.token = token;
+        this.isNewUser = isNewUser;
     }
-
     public String getToken() {
         return token;
     }
