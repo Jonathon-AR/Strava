@@ -1,4 +1,4 @@
-package com.example.backend.utils;
+package com.example.backend.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -12,10 +12,10 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     @Value("${SECRET_KEY}")
-    private String SECRET_KEY; // Use a secure key in production
+    private String SECRET_KEY;
 
     @Value("${JWT_EXPIRATION_TIME}")
-    private long JWT_EXPIRATION_TIME; // 1 day in milliseconds
+    private long JWT_EXPIRATION_TIME;
 
     private Key key;
 

@@ -2,6 +2,7 @@ package com.example.backend.utils;
 
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
