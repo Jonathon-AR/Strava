@@ -3,6 +3,7 @@ package com.example.backend.service;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.example.backend.model.User;
+
 import java.util.Collection;
 import java.util.Objects;
 

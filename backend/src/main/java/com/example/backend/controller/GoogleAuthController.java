@@ -51,15 +51,14 @@ public class GoogleAuthController {
         }
 
         String email = googleUser.getEmail();
-        if(userRepository.existsByEmail(email)){
+        if (userRepository.existsByEmail(email)) {
             String token = jwtTokenProvider.createToken(email);
-            return ResponseEntity.ok(new AuthResponse(token,false));
-        }
-        else {
+            return ResponseEntity.ok(new AuthResponse(token, false));
+        } else {
             String name = googleUser.getName();
-            userRepository.save(new User(email,name,passwordEncoder.encode("google_auth_user")));
+            userRepository.save(new User(email, name, passwordEncoder.encode("google_auth_user")));
             String token = jwtTokenProvider.createToken(email);
-            return ResponseEntity.ok(new AuthResponse(token,true));
+            return ResponseEntity.ok(new AuthResponse(token, true));
         }
     }
 }
@@ -70,6 +69,7 @@ class GoogleAuthRequest {
     public String getAccessToken() {
         return accessToken;
     }
+
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
@@ -82,6 +82,7 @@ class GoogleUserResponse {
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -89,6 +90,7 @@ class GoogleUserResponse {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -98,10 +100,11 @@ class AuthResponse {
     private String token;
     private Boolean isNewUser;
 
-    public AuthResponse(String token, Boolean isNewUser){
+    public AuthResponse(String token, Boolean isNewUser) {
         this.token = token;
         this.isNewUser = isNewUser;
     }
+
     public String getToken() {
         return token;
     }

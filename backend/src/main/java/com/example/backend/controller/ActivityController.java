@@ -18,7 +18,7 @@ public class ActivityController {
     @PostMapping("/start")
     public ResponseEntity<?> startActivity(@RequestBody ActivityStartRequest requestBody) {
         try {
-            Long activityId=activityService.createActivityByUser(Timestamp.valueOf(requestBody.getStart()));
+            Long activityId = activityService.createActivityByUser(Timestamp.valueOf(requestBody.getStart()));
             return ResponseEntity.ok().body(activityId);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while starting the activity.");
@@ -35,12 +35,12 @@ public class ActivityController {
         }
     }
 
-//
-//    //gps points (activity id,  arr[xpoint, ypoint], - response (avg time, maxspeed, distance)
-//    @PostMapping("/gps")
-//    public ResponseEntity<?> locationUpdate(@RequestBody reqbody){
-//
-//    }
+    //
+    //    //gps points (activity id,  arr[xpoint, ypoint], - response (avg time, maxspeed, distance)
+    //    @PostMapping("/gps")
+    //    public ResponseEntity<?> locationUpdate(@RequestBody reqbody){
+    //
+    //    }
 
 
     @GetMapping("/id")
@@ -56,9 +56,11 @@ public class ActivityController {
 
 class ActivityStartRequest {
     private String start;
+
     public String getStart() {
         return start;
     }
+
     public void setStart(String start) {
         this.start = start;
     }
@@ -67,17 +69,21 @@ class ActivityStartRequest {
 class ActivityEndRequest {
     private String end;
     private Long activityId;
+
     public String getEnd() {
         return end;
     }
+
     public void setEnd(String end) {
         this.end = end;
     }
+
     public Long getActivityId() {
         return activityId;
     }
+
     public void setActivityId(Long activityId) {
-        this.activityId=activityId;
+        this.activityId = activityId;
     }
 }
 
@@ -85,9 +91,11 @@ class ActivityEndRequest {
 
 class ActivityDetailsRequest {
     private Long activityId;
+
     public Long getActivityId() {
         return activityId;
     }
+
     public void setActivityId(Long activityId) {
         this.activityId = activityId;
     }

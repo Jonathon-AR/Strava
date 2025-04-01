@@ -9,10 +9,9 @@ import java.util.List;
 
 public interface ActivityService {
     Long createActivityByUser(Timestamp start);
+
     Activity endActivity(Timestamp end, Long activityId);
-//    Activity createActivity(Activity activity);
-//    List<Activity> getAllActivities();
-//    List<Activity> getActivitiesByUserId(User user);
+
+    //    List<Activity> getActivitiesByUserId(User user);
     Activity getActivityById(Long id);
-//    void deleteActivity(Long id);
 }

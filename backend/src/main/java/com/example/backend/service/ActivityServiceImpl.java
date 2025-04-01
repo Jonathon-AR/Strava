@@ -23,18 +23,18 @@ public class ActivityServiceImpl implements ActivityService {
     @Autowired
     public ActivityServiceImpl(ActivityRepository activityRepository, UserRepository userRepository) {
         this.activityRepository = activityRepository;
-        this.userRepository=userRepository;
+        this.userRepository = userRepository;
     }
 
     // gps points activity
-
     @Override
     public Activity getActivityById(Long id) {
         return activityRepository.findById(id).orElseThrow(() ->
                 new RuntimeException("Activity not found"));
     }
 
-    public Activity endActivity(Timestamp end, Long activityId){
+    @Override
+    public Activity endActivity(Timestamp end, Long activityId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
             throw new RuntimeException("No user is authenticated");
@@ -46,13 +46,14 @@ public class ActivityServiceImpl implements ActivityService {
         return activity;
     }
 
-    public Long createActivityByUser(Timestamp start){
+    @Override
+    public Long createActivityByUser(Timestamp start) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
             throw new RuntimeException("No user is authenticated");
         }
         String userEmail = authentication.getPrincipal().toString();
-        User user= userRepository.findByEmail(userEmail);
+        User user = userRepository.findByEmail(userEmail);
         Activity activity = new Activity(user.getId(), start, null, BigDecimal.ZERO, Activity.Status.ACTIVE);
         activityRepository.save(activity);
         return activity.getId();
