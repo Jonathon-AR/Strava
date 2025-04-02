@@ -1,17 +1,17 @@
 package com.example.backend.service;
 
 import com.example.backend.model.Activity;
-import org.springframework.data.util.Lock;
+import com.example.backend.model.GpsPoint;
 
-import java.sql.Time;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 public interface ActivityService {
     Long createActivityByUser(Timestamp start);
 
     Activity endActivity(Timestamp end, Long activityId);
 
-    //    List<Activity> getActivitiesByUserId(User user);
     Activity getActivityById(Long id);
 }

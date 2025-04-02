@@ -1,8 +1,10 @@
 package com.example.backend.service;
 
 import com.example.backend.model.Activity;
+import com.example.backend.model.GpsPoint;
 import com.example.backend.model.User;
 import com.example.backend.repository.ActivityRepository;
+import com.example.backend.repository.GpsPointRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.utils.Helper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,21 +14,24 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ActivityServiceImpl implements ActivityService {
 
     private final ActivityRepository activityRepository;
     private final UserRepository userRepository;
+    private final GpsPointRepository gpsPointRepository;
+    private final Helper helper;
 
     @Autowired
-    public ActivityServiceImpl(ActivityRepository activityRepository, UserRepository userRepository) {
+    public ActivityServiceImpl(ActivityRepository activityRepository, UserRepository userRepository, GpsPointRepository gpsPointRepository, Helper helper) {
         this.activityRepository = activityRepository;
         this.userRepository = userRepository;
+        this.gpsPointRepository = gpsPointRepository;
+        this.helper = helper;
     }
 
-    // gps points activity
     @Override
     public Activity getActivityById(Long id) {
         return activityRepository.findById(id).orElseThrow(() ->

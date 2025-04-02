@@ -17,6 +17,8 @@ public class User {
 
     private String password;
 
+    //height weight age, etc TBD
+
     public User() {
     }
 

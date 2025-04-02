@@ -23,7 +23,7 @@ public class GpsPoint {
     @Column(name = "longitude", nullable = false, precision = 11, scale = 8)
     private BigDecimal longitude;
 
-    @Column(name = "timestamp", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "timestamp", nullable = false, columnDefinition = "FRONTEND PROVIDED TIMESTAMP")
     private Timestamp timestamp;
 
     public UUID getId() {

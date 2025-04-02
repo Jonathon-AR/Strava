@@ -21,16 +21,22 @@ public class Activity {
     @Column(name = "end_time")
     private Timestamp endTime;
 
-    @Column(name = "distance", precision = 10, scale = 2)
+    @Column(name = "distance", precision = 7, scale = 2)
     private BigDecimal distance;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_gps_point")
+    private GpsPoint lastGpsPoint;
+
+    @Column(name = "max_speed", precision = 5, scale = 2)
+    private BigDecimal maxSpeed;
+
     public enum Status {
-        ACTIVE,
-        COMPLETED
+        ACTIVE, COMPLETED
     }
 
     public Activity(Long userId, Timestamp startTime, Timestamp endTime, BigDecimal distance, Status status) {
@@ -77,11 +83,27 @@ public class Activity {
         this.distance = distance;
     }
 
+    public BigDecimal getMaxSpeed() {
+        return maxSpeed;
+    }
+
+    public void setMaxSpeed(BigDecimal maxSpeed) {
+        this.maxSpeed = maxSpeed;
+    }
+
     public Status getStatus() {
         return status;
     }
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public GpsPoint getLastGpsPoint() {
+        return this.lastGpsPoint;
+    }
+
+    public void setLastGpsPoint(GpsPoint lastGpsPoint) {
+        this.lastGpsPoint = lastGpsPoint;
     }
 }
