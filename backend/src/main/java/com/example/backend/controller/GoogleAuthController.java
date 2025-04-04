@@ -52,13 +52,14 @@ public class GoogleAuthController {
 
         String email = googleUser.getEmail();
         if (userRepository.existsByEmail(email)) {
+            User user=userRepository.findByEmail(email);
             String token = jwtTokenProvider.createToken(email);
-            return ResponseEntity.ok(new AuthResponse(token, false));
+            return ResponseEntity.ok(new AuthResponse(token, false, user.getUsername(), email));
         } else {
             String name = googleUser.getName();
-            userRepository.save(new User(email, name, passwordEncoder.encode("google_auth_user")));
+            userRepository.save(new User(name, email, passwordEncoder.encode("google_auth_user")));
             String token = jwtTokenProvider.createToken(email);
-            return ResponseEntity.ok(new AuthResponse(token, true));
+            return ResponseEntity.ok(new AuthResponse(token, true, name, email));
         }
     }
 }
@@ -99,13 +100,42 @@ class GoogleUserResponse {
 class AuthResponse {
     private String token;
     private Boolean isNewUser;
+    private String name;
+    private String email;
 
-    public AuthResponse(String token, Boolean isNewUser) {
+
+    public AuthResponse(String token, Boolean isNewUser, String name, String email) {
         this.token = token;
         this.isNewUser = isNewUser;
+        this.name=name;
+        this.email=email;
+    }
+
+    public Boolean getNewUser() {
+        return isNewUser;
+    }
+
+    public void setNewUser(Boolean newUser) {
+        isNewUser = newUser;
     }
 
     public String getToken() {
         return token;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
