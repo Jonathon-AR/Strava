@@ -1,12 +1,11 @@
 package com.example.backend.service;
 
 import com.example.backend.model.GpsPoint;
-
-import java.math.BigDecimal;
+import com.example.backend.dto.LocationStatsResponse;
+import com.example.backend.dto.LocationHistoryResponse;
 import java.util.List;
-import java.util.Map;
 
 public interface LocationService {
-    Map<String, BigDecimal> updateLocation(List<GpsPoint> gpsPointsList, Long activityId);
-    Map<String, Object> getLocationHistory(Long activityId);
+    LocationStatsResponse updateLocation(List<GpsPoint> gpsPointsList, Long activityId);
+    LocationHistoryResponse getLocationHistory(Long activityId);
 }

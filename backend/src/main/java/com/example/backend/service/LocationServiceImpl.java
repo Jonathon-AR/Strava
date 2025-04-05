@@ -1,5 +1,7 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.LocationHistoryResponse;
+import com.example.backend.dto.LocationStatsResponse;
 import com.example.backend.model.Activity;
 import com.example.backend.model.GpsPoint;
 import com.example.backend.repository.ActivityRepository;
@@ -29,7 +31,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public Map<String, BigDecimal> updateLocation(List<GpsPoint> newGpsPoints, Long activityId) {
+    public LocationStatsResponse updateLocation(List<GpsPoint> newGpsPoints, Long activityId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
             throw new RuntimeException("No user is authenticated");
@@ -43,8 +45,6 @@ public class LocationServiceImpl implements LocationService {
         }
         gpsPointRepository.saveAll(newGpsPoints);
 
-        Map<String, BigDecimal> stats = new HashMap<>();
-
         BigDecimal maxSegmentSpeed = BigDecimal.ZERO;
         for (GpsPoint gpsPoint : newGpsPoints) {
             if (maxSegmentSpeed.compareTo(gpsPoint.getSpeed()) < 0) {
@@ -56,17 +56,17 @@ public class LocationServiceImpl implements LocationService {
             activity.setMaxSpeed(maxSegmentSpeed);
         }
 
-        stats.put("maxSpeed", activity.getMaxSpeed());
-
         BigDecimal updatedDistance = helper.updateCumulativeDistance(activity, newGpsPoints);
         activity.setDistance(updatedDistance);
 
         newGpsPoints.sort(Comparator.comparing(GpsPoint::getTimestamp));
         GpsPoint latestNewPoint = newGpsPoints.get(newGpsPoints.size() - 1);
         activity.setLastGpsPoint(latestNewPoint);
-
-        stats.put("distance", activity.getDistance());
         activityRepository.save(activity);
+
+        LocationStatsResponse statsResponse = new LocationStatsResponse();
+        statsResponse.setMaxSpeed(activity.getMaxSpeed());
+        statsResponse.setDistance(activity.getDistance());
 
         if (gpsPointRepository.countByActivityId(activityId) > 4) {
             Timestamp activityStart = activity.getStartTime();
@@ -75,28 +75,29 @@ public class LocationServiceImpl implements LocationService {
             double cumulativeAvgSpeed = (elapsedSeconds > 0)
                     ? updatedDistance.doubleValue() / (elapsedSeconds / 3600.0)
                     : 0.0;
-
-            stats.put("avgSpeed", BigDecimal.valueOf(cumulativeAvgSpeed));
+            statsResponse.setAvgSpeed(BigDecimal.valueOf(cumulativeAvgSpeed));
+        } else {
+            statsResponse.setAvgSpeed(BigDecimal.ZERO);
         }
 
-        return stats;
+        return statsResponse;
     }
 
-
-    public Map<String, Object> getLocationHistory(Long activityId) {
+    @Override
+    public LocationHistoryResponse getLocationHistory(Long activityId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
             throw new RuntimeException("No user is authenticated");
         }
-        Map<String, Object> map = new HashMap<>();
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new RuntimeException("Activity not found"));
-        map.put("start_time", activity.getStartTime());
-        map.put("end_time", activity.getEndTime());
-        map.put("distance", activity.getDistance());
-        map.put("max_speed", activity.getMaxSpeed());
+        LocationHistoryResponse response = new LocationHistoryResponse();
+        response.setStartTime(activity.getStartTime());
+        response.setEndTime(activity.getEndTime());
+        response.setDistance(activity.getDistance());
+        response.setMaxSpeed(activity.getMaxSpeed());
         List<GpsPoint> gpsPointList = gpsPointRepository.findByActivityIdOrderByTimestampAsc(activityId);
-        map.put("gps_points", gpsPointList);
-        return map;
+        response.setGpsPoints(gpsPointList);
+        return response;
     }
 }

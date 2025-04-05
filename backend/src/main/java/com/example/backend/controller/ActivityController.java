@@ -3,11 +3,11 @@ package com.example.backend.controller;
 import com.example.backend.model.Activity;
 import com.example.backend.service.ActivityService;
 import com.example.backend.utils.Helper;
+import com.example.backend.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.backend.dto.*;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -16,48 +16,56 @@ import java.util.List;
 @RequestMapping("/activity")
 public class ActivityController {
 
-    @Autowired
-    private ActivityService activityService;
+    private final ActivityService activityService;
+    private final Helper helper;
 
-    Helper helper = new Helper();
+    @Autowired
+    public ActivityController(ActivityService activityService) {
+        this.activityService = activityService;
+        this.helper = new Helper();
+    }
 
     @PostMapping("/start")
-    public ResponseEntity<?> startActivity(@RequestBody ActivityStartRequest requestBody) {
+    public ResponseEntity<Long> startActivity(@RequestBody ActivityStartRequest requestBody) {
         try {
             Long activityId = activityService.createActivityByUser(new Timestamp(requestBody.getStart()));
-            return ResponseEntity.ok().body(activityId);
+            return ResponseEntity.ok(activityId);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while starting the activity.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
 
     @PostMapping("/end")
-    public ResponseEntity<?> endActivity(@RequestBody ActivityEndRequest requestBody) {
+    public ResponseEntity<Activity> endActivity(@RequestBody ActivityEndRequest requestBody) {
         try {
             Activity activity = activityService.endActivity(Timestamp.valueOf(requestBody.getEnd()), requestBody.getActivityId());
-            return ResponseEntity.ok().body(activity);
+            return ResponseEntity.ok(activity);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while ending the activity.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
 
     @GetMapping("/{activityId}")
-    public ResponseEntity<?> getActivity(@PathVariable Long activityId) {
+    public ResponseEntity<Activity> getActivity(@PathVariable Long activityId) {
         try {
             Activity activity = activityService.getActivityById(activityId);
-            return ResponseEntity.ok().body(activity);
+            return ResponseEntity.ok(activity);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while fetching the activity.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
 
     @GetMapping("/byUserId")
-    public ResponseEntity<?> getActivitybyUserId() {
+    public ResponseEntity<List<Activity>> getActivityByUserId() {
         try {
             List<Activity> list = activityService.getActivitiesByUserId();
-            return ResponseEntity.ok().body(list);
+            return ResponseEntity.ok(list);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while fetching the activities.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
 }
