@@ -22,7 +22,7 @@ const Login: React.FC = () => {
       ).then((response) => {
         const { token, name, email } = response;
         saveAuthData({ token, name, email });
-        navigate("/activity"); // Redirect after login
+        navigate("/activity");
       }).catch(err => {
         console.error("Login failed:", err);
       });
