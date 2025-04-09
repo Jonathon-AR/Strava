@@ -30,18 +30,18 @@ const Tracker = () => {
   }, [isActive]);
 
   useEffect(() => {
-    if (activityId!=0) return;
-      const payload = {
-        start: position?.timestamp,
-      };
-      (async () => {
-        try {
-          const data = await apiRequest<any>("/start", "POST", payload);
-          setActivityId(data.activityId);
-        } catch (err) {
-          console.error("Failed to fetch activityId:", err);
-        }
-      })();
+    if (activityId != 0) return;
+    const payload = {
+      start: position?.timestamp,
+    };
+    (async () => {
+      try {
+        const data = await apiRequest<any>("/activity/start", "POST", payload);
+        setActivityId(data.activityId);
+      } catch (err) {
+        console.error("Failed to fetch activityId:", err);
+      }
+    })();
   }, [isActive]);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ const Tracker = () => {
           gpsPointsList: gpsQueue,
           activityId,
         };
-        
+
         const data = await apiRequest<Stats>("/gps", "POST", payload);
         setAvgSpeed(data.avgSpeed);
         setDistance(data.distance);
