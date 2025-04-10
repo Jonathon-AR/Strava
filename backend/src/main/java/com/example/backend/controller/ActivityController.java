@@ -16,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/activity")
+@CrossOrigin(origins = "http://localhost:3000") // Enable CORS for this method
 public class ActivityController {
 
     @Autowired
@@ -26,7 +27,7 @@ public class ActivityController {
     @PostMapping("/start")
     public ResponseEntity<?> startActivity(@RequestBody ActivityStartRequest requestBody) {
         try {
-            Long activityId = activityService.createActivityByUser(Timestamp.valueOf(requestBody.getStart()));
+            Long activityId = activityService.createActivityByUser(new Timestamp(requestBody.getStart()));
             return ResponseEntity.ok().body(activityId);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while starting the activity.");
@@ -55,13 +56,13 @@ public class ActivityController {
 }
 
 class ActivityStartRequest {
-    private String start;
+    private long start;
 
-    public String getStart() {
+    public long getStart() {
         return start;
     }
 
-    public void setStart(String start) {
+    public void setStart(long start) {
         this.start = start;
     }
 }

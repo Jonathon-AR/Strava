@@ -5,24 +5,27 @@ import com.example.backend.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+@RestController
+@RequestMapping("/gps")
+@CrossOrigin(origins = "http://localhost:3000")
 public class LocationController {
 
     @Autowired
     private LocationService locationService;
 
-    @PostMapping("/gps")
+    @PostMapping("/")
     public ResponseEntity<?> updateLocation(@RequestBody UpdateLocationRequest requestBody) {
         try {
             Map<String, BigDecimal> stats = (Map<String, BigDecimal>) locationService.updateLocation(requestBody.getGpsPointsList(), requestBody.getActivityId());
             return ResponseEntity.ok().body(stats);
         } catch (Exception e) {
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the activity.");
         }
     }

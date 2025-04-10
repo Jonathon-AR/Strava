@@ -34,10 +34,15 @@ public class LocationServiceImpl implements LocationService {
         if (authentication == null || authentication.getPrincipal() == null) {
             throw new RuntimeException("No user is authenticated");
         }
-        gpsPointRepository.saveAll(newGpsPoints);
 
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new RuntimeException("Activity not found"));
+
+        for (GpsPoint gpsPoint : newGpsPoints) {
+            gpsPoint.setActivity(activity);
+        }
+
+        gpsPointRepository.saveAll(newGpsPoints);
 
         // Incrementally update cumulative distance based on new GPS points
         BigDecimal updatedDistance = helper.updateCumulativeDistance(activity, newGpsPoints);
