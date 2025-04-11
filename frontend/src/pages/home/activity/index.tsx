@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useGeoLocation } from "../../utils/location";
-import { GpsPointType } from "../../types/gpsPoint";
-import { formatTime } from "../../utils/helper";
-import { apiRequest } from "../..//utils/axios";
+import { useGeoLocation } from "../../../utils/location";
+import { GpsPointType } from "../../../types/gpsPoint";
+import { formatTime } from "../../../utils/helper";
+import { apiRequest } from "../../../utils/axios";
+import { useNavigate } from "react-router-dom";
+
+interface ActivityProps {
+  activityId: number;
+  setActivityId: React.Dispatch<React.SetStateAction<number>>;
+}
 
 interface Stats {
   avgSpeed: number;
   distance: number;
 }
 
-const Tracker = () => {
+const Activity: React.FC<ActivityProps> = ({ activityId, setActivityId}) => {
   const { position, error, isTracking, startTracking, stopTracking } =
     useGeoLocation();
   const [gpsQueue, setGpsQueue] = useState<GpsPointType[]>([]);
@@ -17,7 +23,6 @@ const Tracker = () => {
   const [avgSpeed, setAvgSpeed] = useState<number>(0);
   const [distance, setDistance] = useState<number>(0);
   const [isActive, setIsActive] = useState<boolean>(false);
-  const [activityId, setActivityId] = useState<number>(0);
 
   useEffect(() => {
     startTracking();
@@ -30,14 +35,13 @@ const Tracker = () => {
   }, [isActive]);
 
   useEffect(() => {
-    if (activityId != 0) return;
-    const payload = {
-      start: position?.timestamp,
-    };
+    if (!isActive || activityId !== 0 || !position) return;
+
+    const payload = { start: position.timestamp };
     (async () => {
       try {
         const data = await apiRequest<any>("/activity/start", "POST", payload);
-        setActivityId(data.activityId);
+        setActivityId(data);
       } catch (err) {
         console.error("Failed to fetch activityId:", err);
       }
@@ -45,39 +49,55 @@ const Tracker = () => {
   }, [isActive]);
 
   useEffect(() => {
-    if (!isActive) return;
-    const postData = async () => {
-      if (position) {
-        const newPoint: GpsPointType = {
-          latitude: position.latitude,
-          longitude: position.longitude,
-          timestamp: position.timestamp,
-        };
-        setGpsQueue((prevQueue) => [...prevQueue, newPoint]);
-      }
-      try {
-        if (gpsQueue.length < 1) return;
-        const payload = {
-          gpsPointsList: gpsQueue,
-          activityId,
-        };
+    if (!isActive || !position || activityId === 0) return;
 
-        const data = await apiRequest<Stats>("/gps", "POST", payload);
-        setAvgSpeed(data.avgSpeed);
-        setDistance(data.distance);
-        setGpsQueue([]);
-      } catch (err) {
-        console.error("Failed to fetch stats:", err);
-      }
+    const newPoint: GpsPointType = {
+      latitude: position.latitude,
+      longitude: position.longitude,
+      timestamp: position.timestamp,
+      speed: position.speed,
     };
-    postData();
-    const interval = setInterval(postData, 5000);
+
+    setGpsQueue((prev) => [...prev, newPoint]);
+  }, [position, isActive, activityId]);
+  
+  useEffect(() => {
+    if (!isActive || activityId === 0) return;
+
+    const interval = setInterval(() => {
+      if (gpsQueue.length < 1 || activityId === 0) return;
+
+      const payload = {
+        gpsPointsList: gpsQueue,
+        activityId,
+      };
+
+      apiRequest<Stats>("/gps/", "POST", payload)
+        .then((data) => {
+          if (data) {
+            if(data.avgSpeed) setAvgSpeed(parseFloat(data.avgSpeed.toFixed(2)));
+            setDistance(parseFloat(data.distance.toFixed(2)));
+          }
+          setGpsQueue([]);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch stats:", err);
+        });
+        console.log(payload);
+    }, 5000);
+
     return () => clearInterval(interval);
-  }, [isActive]);
+  }, [isActive, gpsQueue, activityId]);
 
   const toggleActivity = () => {
     setIsActive(!isActive);
   };
+
+  // const navigate = useNavigate();
+  
+  // const openmap = () => {
+  //   navigate('/map');
+  // };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
@@ -101,7 +121,9 @@ const Tracker = () => {
         >
           <div className="w-6 h-6 bg-white"></div>
         </button>
-        <button className="w-14 h-14 rounded-full bg-gray-800 flex items-center justify-center">
+        <button className="w-14 h-14 rounded-full bg-gray-800 flex items-center justify-center" 
+        // onClick={openmap}
+        >
           <svg
             className="w-6 h-6 text-orange-500"
             fill="none"
@@ -128,4 +150,4 @@ const Tracker = () => {
   );
 };
 
-export default Tracker;
+export default Activity;

@@ -5,6 +5,7 @@ interface Coordinates {
   latitude: number;
   longitude: number;
   timestamp: number;
+  speed: number;
 }
 
 interface GeoLocationOptions {
@@ -32,6 +33,7 @@ export const useGeoLocation = (options: GeoLocationOptions = {}) => {
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
           timestamp: pos.timestamp,
+          speed: pos.coords.speed? pos.coords.speed : 0,
         };
         setPosition(coords);
         setError(null);
