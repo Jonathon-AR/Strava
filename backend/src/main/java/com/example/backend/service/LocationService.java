@@ -8,4 +8,5 @@ import java.util.Map;
 
 public interface LocationService {
     Map<String, BigDecimal> updateLocation(List<GpsPoint> gpsPointsList, Long activityId);
+    Map<String, Object> getLocationHistory(Long activityId);
 }

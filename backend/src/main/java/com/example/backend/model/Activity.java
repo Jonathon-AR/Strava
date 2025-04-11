@@ -28,7 +28,7 @@ public class Activity {
     @Column(name = "status", nullable = false)
     private Status status;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "last_gps_point")
     private GpsPoint lastGpsPoint;
 
@@ -48,17 +48,6 @@ public class Activity {
         this.endTime = endTime;
         this.distance = distance;
         this.status = status;
-    }
-
-    public Activity(Long id, Long userId, Timestamp startTime, Timestamp endTime, BigDecimal distance, Status status, GpsPoint lastGpsPoint, BigDecimal maxSpeed) {
-        this.id = id;
-        this.userId = userId;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.distance = distance;
-        this.status = status;
-        this.lastGpsPoint = lastGpsPoint;
-        this.maxSpeed = maxSpeed;
     }
 
     public Long getId() {

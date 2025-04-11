@@ -8,5 +8,7 @@ import java.util.List;
 
 @Repository
 public interface GpsPointRepository extends JpaRepository<GpsPoint, Long> {
-    List<GpsPoint> findTop5ByActivityIdOrderByTimestampDesc(Long activityId);
+    GpsPoint findTopByActivityIdOrderByTimestampDesc(Long activityId);
+    Long countByActivityId(Long activityId);
+    List<GpsPoint> findByActivityIdOrderByTimestampAsc(Long activityId);
 }

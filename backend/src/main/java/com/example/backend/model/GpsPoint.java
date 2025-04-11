@@ -1,5 +1,7 @@
 package com.example.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -13,6 +15,7 @@ public class GpsPoint {
     @GeneratedValue
     private UUID id;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "activity_id", nullable = false)
     private Activity activity;
@@ -22,6 +25,9 @@ public class GpsPoint {
 
     @Column(name = "longitude", nullable = false, precision = 11, scale = 8)
     private BigDecimal longitude;
+
+    @Column(name = "speed", nullable = true, precision = 11, scale = 8)
+    private BigDecimal speed;
 
     @Column(name = "timestamp", nullable = false, columnDefinition = "FRONTEND PROVIDED TIMESTAMP")
     private Timestamp timestamp;
@@ -64,5 +70,13 @@ public class GpsPoint {
 
     public void setTimestamp(Timestamp timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public BigDecimal getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(BigDecimal speed) {
+        this.speed = speed;
     }
 }

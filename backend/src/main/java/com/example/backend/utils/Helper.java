@@ -12,15 +12,6 @@ import java.util.stream.Collectors;
 @Component
 public class Helper {
 
-    public double calculateSegmentSpeed(GpsPoint p1, GpsPoint p2) {
-        double distanceKm = calculateDistance(p1, p2);
-        long timeDiffSec = (p2.getTimestamp().getTime() - p1.getTimestamp().getTime()) / 1000;
-        if (timeDiffSec <= 0) {
-            return 0.0;
-        }
-        return distanceKm / (timeDiffSec / 3600.0);
-    }
-
     private double calculateDistance(GpsPoint p1, GpsPoint p2) {
         final int EARTH_RADIUS_KM = 6371;
         double lat1 = p1.getLatitude().doubleValue();

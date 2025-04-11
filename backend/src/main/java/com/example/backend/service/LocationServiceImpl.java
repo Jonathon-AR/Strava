@@ -41,56 +41,62 @@ public class LocationServiceImpl implements LocationService {
         for (GpsPoint gpsPoint : newGpsPoints) {
             gpsPoint.setActivity(activity);
         }
-
         gpsPointRepository.saveAll(newGpsPoints);
 
-        // Incrementally update cumulative distance based on new GPS points
+        Map<String, BigDecimal> stats = new HashMap<>();
+
+        BigDecimal maxSegmentSpeed = BigDecimal.ZERO;
+        for (GpsPoint gpsPoint : newGpsPoints) {
+            if (maxSegmentSpeed.compareTo(gpsPoint.getSpeed()) < 0) {
+                maxSegmentSpeed = gpsPoint.getSpeed();
+            }
+        }
+
+        if (activity.getMaxSpeed() == null || maxSegmentSpeed.compareTo(activity.getMaxSpeed()) > 0) {
+            activity.setMaxSpeed(maxSegmentSpeed);
+        }
+
+        stats.put("maxSpeed", activity.getMaxSpeed());
+
         BigDecimal updatedDistance = helper.updateCumulativeDistance(activity, newGpsPoints);
-        activity.setDistance(updatedDistance);
         activity.setDistance(updatedDistance);
 
         newGpsPoints.sort(Comparator.comparing(GpsPoint::getTimestamp));
         GpsPoint latestNewPoint = newGpsPoints.get(newGpsPoints.size() - 1);
         activity.setLastGpsPoint(latestNewPoint);
 
-        // Retrieve only the last five GPS points for speed calculation
-        List<GpsPoint> lastFivePoints = gpsPointRepository.findTop5ByActivityIdOrderByTimestampDesc(activityId);
-        if (lastFivePoints.size() < 5) {
-            activityRepository.save(activity);
-            return Collections.emptyMap();
-        }
-        // Reverse for ascending order
-        Collections.reverse(lastFivePoints);
-
-        // Calculate maximum segment speed over the last five points
-        double maxSegmentSpeed = 0.0;
-        for (int i = 1; i < lastFivePoints.size(); i++) {
-            double segmentSpeed = helper.calculateSegmentSpeed(lastFivePoints.get(i - 1), lastFivePoints.get(i));
-            if (segmentSpeed > maxSegmentSpeed) {
-                maxSegmentSpeed = segmentSpeed;
-            }
-        }
-
-        // Update maxSpeed if the newly computed segment speed is greater
-        BigDecimal newSegmentSpeed = BigDecimal.valueOf(maxSegmentSpeed);
-        if (activity.getMaxSpeed() == null || newSegmentSpeed.compareTo(activity.getMaxSpeed()) > 0) {
-            activity.setMaxSpeed(newSegmentSpeed);
-        }
-
-        // Calculate cumulative average speed using the elapsed time since activity start
-        Timestamp activityStart = activity.getStartTime();
-        Timestamp lastTimestamp = lastFivePoints.get(lastFivePoints.size() - 1).getTimestamp();
-        long elapsedSeconds = (lastTimestamp.getTime() - activityStart.getTime()) / 1000;
-        double cumulativeAvgSpeed = (elapsedSeconds > 0)
-                ? updatedDistance.doubleValue() / (elapsedSeconds / 3600.0) : 0.0;
-
+        stats.put("distance", activity.getDistance());
         activityRepository.save(activity);
 
-        Map<String, BigDecimal> stats = new HashMap<>();
-        stats.put("maxSpeed", activity.getMaxSpeed());
-        stats.put("avgSpeed", BigDecimal.valueOf(cumulativeAvgSpeed));
-        stats.put("distance", activity.getDistance());
+        if (gpsPointRepository.countByActivityId(activityId) > 4) {
+            Timestamp activityStart = activity.getStartTime();
+            Timestamp lastTimestamp = gpsPointRepository.findTopByActivityIdOrderByTimestampDesc(activityId).getTimestamp();
+            long elapsedSeconds = (lastTimestamp.getTime() - activityStart.getTime()) / 1000;
+            double cumulativeAvgSpeed = (elapsedSeconds > 0)
+                    ? updatedDistance.doubleValue() / (elapsedSeconds / 3600.0)
+                    : 0.0;
+
+            stats.put("avgSpeed", BigDecimal.valueOf(cumulativeAvgSpeed));
+        }
 
         return stats;
+    }
+
+
+    public Map<String, Object> getLocationHistory(Long activityId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new RuntimeException("No user is authenticated");
+        }
+        Map<String, Object> map = new HashMap<>();
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new RuntimeException("Activity not found"));
+        map.put("start_time", activity.getStartTime());
+        map.put("end_time", activity.getEndTime());
+        map.put("distance", activity.getDistance());
+        map.put("max_speed", activity.getMaxSpeed());
+        List<GpsPoint> gpsPointList = gpsPointRepository.findByActivityIdOrderByTimestampAsc(activityId);
+        map.put("gps_points", gpsPointList);
+        return map;
     }
 }

@@ -29,6 +29,17 @@ public class LocationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the activity.");
         }
     }
+
+    @GetMapping("/{activityId}")
+    public ResponseEntity<?> getLocationHistory(@PathVariable Long activityId) {
+        try {
+            Map<String, Object> stats = locationService.getLocationHistory(activityId);
+            return ResponseEntity.ok().body(stats);
+        } catch (Exception e) {
+            System.out.println(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while fetching the location history.");
+        }
+    }
 }
 
 class UpdateLocationRequest {
