@@ -18,6 +18,9 @@ public class JwtTokenProvider {
     @Value("${JWT_EXPIRATION_TIME}")
     private long JWT_EXPIRATION_TIME;
 
+    @Value("${JWT_EXPIRATION_TIME}")
+    private long JWT_REFRESH_EXPIRATION_TIME;
+
     private Key key;
 
     @PostConstruct
@@ -30,6 +33,15 @@ public class JwtTokenProvider {
                 .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION_TIME))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+    
+    public String createRefreshToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + JWT_REFRESH_EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
