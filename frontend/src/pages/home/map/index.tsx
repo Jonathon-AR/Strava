@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { apiRequest } from "../../../utils/axios";
+import api from "../../../utils/axios";
 
 interface MapProps {
   activityId: number;
@@ -47,8 +47,8 @@ const MapWithPath: React.FC<MapProps> = ({ activityId }) => {
     if (!activityId) return;
   
     const fetchCoordinates = () => {
-      apiRequest<any>(`/gps/${activityId}`, "GET")
-        .then((data) => {
+      api.request(`/gps/${activityId}`, "GET")
+        .then((data:any) => {
           if (data.gps_points) {
             const sorted = data.gps_points.sort((a: Coordinate, b: Coordinate) =>
               a.timestamp.localeCompare(b.timestamp)
@@ -56,7 +56,7 @@ const MapWithPath: React.FC<MapProps> = ({ activityId }) => {
             setCoordinates(sorted);
           }
         })
-        .catch((err) => {
+        .catch((err:any) => {
           console.error("Failed to fetch coordinates:", err);
         });
     };

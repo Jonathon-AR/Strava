@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useGeoLocation } from "../../../utils/location";
 import { GpsPointType } from "../../../types/gpsPoint";
 import { formatTime } from "../../../utils/helper";
-import { apiRequest } from "../../../utils/axios";
-import { useNavigate } from "react-router-dom";
+import api from "../../../utils/axios";
+import { data, useNavigate } from "react-router-dom";
 
 interface ActivityProps {
   activityId: number;
@@ -15,7 +15,7 @@ interface Stats {
   distance: number;
 }
 
-const Activity: React.FC<ActivityProps> = ({ activityId, setActivityId}) => {
+const Activity: React.FC<ActivityProps> = ({ activityId, setActivityId }) => {
   const { position, error, isTracking, startTracking, stopTracking } =
     useGeoLocation();
   const [gpsQueue, setGpsQueue] = useState<GpsPointType[]>([]);
@@ -40,7 +40,7 @@ const Activity: React.FC<ActivityProps> = ({ activityId, setActivityId}) => {
     const payload = { start: position.timestamp };
     (async () => {
       try {
-        const data = await apiRequest<any>("/activity/start", "POST", payload);
+        const data = await api.request<any>("/activity/start", "POST", payload);
         setActivityId(data);
       } catch (err) {
         console.error("Failed to fetch activityId:", err);
@@ -60,7 +60,7 @@ const Activity: React.FC<ActivityProps> = ({ activityId, setActivityId}) => {
 
     setGpsQueue((prev) => [...prev, newPoint]);
   }, [position, isActive, activityId]);
-  
+
   useEffect(() => {
     if (!isActive || activityId === 0) return;
 
@@ -72,10 +72,12 @@ const Activity: React.FC<ActivityProps> = ({ activityId, setActivityId}) => {
         activityId,
       };
 
-      apiRequest<Stats>("/gps/", "POST", payload)
+      api
+        .request<Stats>("/gps/", "POST", payload)
         .then((data) => {
           if (data) {
-            if(data.avgSpeed) setAvgSpeed(parseFloat(data.avgSpeed.toFixed(2)));
+            if (data.avgSpeed)
+              setAvgSpeed(parseFloat(data.avgSpeed.toFixed(2)));
             setDistance(parseFloat(data.distance.toFixed(2)));
           }
           setGpsQueue([]);
@@ -83,7 +85,7 @@ const Activity: React.FC<ActivityProps> = ({ activityId, setActivityId}) => {
         .catch((err) => {
           console.error("Failed to fetch stats:", err);
         });
-        console.log(payload);
+      console.log(payload);
     }, 5000);
 
     return () => clearInterval(interval);
@@ -93,11 +95,19 @@ const Activity: React.FC<ActivityProps> = ({ activityId, setActivityId}) => {
     setIsActive(!isActive);
   };
 
-  // const navigate = useNavigate();
-  
-  // const openmap = () => {
-  //   navigate('/map');
-  // };
+  const closeActivity = () => {
+    api.request(`/activity/end`, "POST", {
+      end: position ? position.timestamp : "",
+      activityId: activityId,
+    });
+    setActivityId(0);
+    stopTracking();
+    setGpsQueue([]);
+    setTime(0);
+    setAvgSpeed(0);
+    setDistance(0);
+    setIsActive(false);
+  };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
@@ -115,15 +125,37 @@ const Activity: React.FC<ActivityProps> = ({ activityId, setActivityId}) => {
       <div className="text-xs text-gray-400 mb-10">KM</div>
 
       <div className="flex space-x-6">
-        <button
-          className="bg-orange-500 w-16 h-16 rounded-full flex items-center justify-center"
-          onClick={toggleActivity}
-        >
-          <div className="w-6 h-6 bg-white"></div>
-        </button>
-        <button className="w-14 h-14 rounded-full bg-gray-800 flex items-center justify-center" 
-        // onClick={openmap}
-        >
+        {isActive ? (
+          <button
+            className="bg-orange-500 w-16 h-16 rounded-full flex items-center justify-center"
+            onClick={toggleActivity}
+          >
+            <div className="w-6 h-6 bg-white"></div>
+          </button>
+        ) : activityId === 0 ? (
+          <button
+            className="bg-orange-500 w-16 h-16 rounded-full flex items-center justify-center"
+            onClick={toggleActivity}
+          >
+            <p>Start</p>
+          </button>
+        ) : (
+          <>
+            <button
+              className="bg-orange-500 w-16 h-16 rounded-full flex items-center justify-center"
+              onClick={toggleActivity}
+            >
+              <p>RESUME</p>
+            </button>
+            <button
+              className="bg-orange-500 w-16 h-16 rounded-full flex items-center justify-center"
+              onClick={closeActivity}
+            >
+              <p>FINISH</p>
+            </button>
+          </>
+        )}
+        <button className="w-14 h-14 rounded-full bg-gray-800 flex items-center justify-center">
           <svg
             className="w-6 h-6 text-orange-500"
             fill="none"

@@ -5,11 +5,11 @@ import { AuthProvider } from "./contexts/AuthContext";
 
 const App: React.FC = () => {
   return (
+    <Router>
       <AuthProvider>
-        <Router>
-          <Routes />
-        </Router>
+        <Routes />
       </AuthProvider>
+    </Router>
   );
 };
 

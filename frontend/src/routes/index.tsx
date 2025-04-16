@@ -8,7 +8,7 @@ import Home from '../pages/home';
 const AppRoutes: React.FC = () => {
   return (
     <Switch>
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<Navigate to="/home" />} />
       <Route path="/login" element={<Login/>} />
       <Route path="/home" element={<Home/>} />
       {/* <Route path="/activity" element={<Activity/>} />
