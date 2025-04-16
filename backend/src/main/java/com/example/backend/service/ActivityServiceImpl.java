@@ -63,4 +63,16 @@ public class ActivityServiceImpl implements ActivityService {
         activityRepository.save(activity);
         return activity.getId();
     }
+
+    @Override
+    public List<Activity> getActivitiesByUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new RuntimeException("No user is authenticated");
+        }
+        String userEmail = authentication.getPrincipal().toString();
+        User user = userRepository.findByEmail(userEmail);
+        List<Activity> activities = activityRepository.findByUserId(user.getId());
+        return activities;
+    }
 }

@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.*;
 import com.example.backend.dto.*;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @RestController
 @RequestMapping("/activity")
-@CrossOrigin(origins = "http://localhost:3000") // Enable CORS for this method
 public class ActivityController {
 
     @Autowired
     private ActivityService activityService;
 
-    Helper helper=new Helper();
+    Helper helper = new Helper();
 
     @PostMapping("/start")
     public ResponseEntity<?> startActivity(@RequestBody ActivityStartRequest requestBody) {
@@ -41,13 +41,23 @@ public class ActivityController {
         }
     }
 
-    @GetMapping("/id")
-    public ResponseEntity<?> getActivity(@RequestBody ActivityDetailsRequest requestBody) {
+    @GetMapping("/{activityId}")
+    public ResponseEntity<?> getActivity(@PathVariable Long activityId) {
         try {
-            Activity activity = activityService.getActivityById(requestBody.getActivityId());
+            Activity activity = activityService.getActivityById(activityId);
             return ResponseEntity.ok().body(activity);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while fetching the activity.");
+        }
+    }
+
+    @GetMapping("/byUserId")
+    public ResponseEntity<?> getActivitybyUserId() {
+        try {
+            List<Activity> list = activityService.getActivitiesByUserId();
+            return ResponseEntity.ok().body(list);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while fetching the activities.");
         }
     }
 }
