@@ -1,7 +1,6 @@
 package com.example.backend.service;
 
 import com.example.backend.model.Activity;
-import com.example.backend.model.GpsPoint;
 import com.example.backend.model.User;
 import com.example.backend.repository.ActivityRepository;
 import com.example.backend.repository.GpsPointRepository;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.List;
 
 @Service
 public class ActivityServiceImpl implements ActivityService {
@@ -34,18 +33,18 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Activity getActivityById(Long id) {
-        return activityRepository.findById(id).orElseThrow(() ->
-                new RuntimeException("Activity not found"));
+        return activityRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Activity not found"));
     }
 
     @Override
     public Activity endActivity(Timestamp end, Long activityId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
-            throw new RuntimeException("No user is authenticated");
+            throw new SecurityException("No user is authenticated");
         }
         Activity activity = getActivityById(activityId);
-        activity.setEndTime((end));
+        activity.setEndTime(end);
         activity.setStatus(Activity.Status.COMPLETED);
         activityRepository.save(activity);
         return activity;
@@ -55,7 +54,7 @@ public class ActivityServiceImpl implements ActivityService {
     public Long createActivityByUser(Timestamp start) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
-            throw new RuntimeException("No user is authenticated");
+            throw new SecurityException("No user is authenticated");
         }
         String userEmail = authentication.getPrincipal().toString();
         User user = userRepository.findByEmail(userEmail);
@@ -68,11 +67,10 @@ public class ActivityServiceImpl implements ActivityService {
     public List<Activity> getActivitiesByUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
-            throw new RuntimeException("No user is authenticated");
+            throw new SecurityException("No user is authenticated");
         }
         String userEmail = authentication.getPrincipal().toString();
         User user = userRepository.findByEmail(userEmail);
-        List<Activity> activities = activityRepository.findByUserId(user.getId());
-        return activities;
+        return activityRepository.findByUserId(user.getId());
     }
 }
